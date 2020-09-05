@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - 1.x
+
+services:
+  - docker
+
+jobs:
+  include:
+    - stage: lint
+      before_install:
+        - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0
+      script: make lint
+    - stage: test
+      script: make test
+    - stage: build
+      script: make build
