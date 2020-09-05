@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	jwt "github.com/dgrijalva/jwt-go"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -24,22 +24,39 @@ var (
 func genToken(pathPem string, pathClaims string, keyID string) string {
 
 	jsonFile, err := os.Open(pathClaims)
-	fatal(err)
+	if err != nil {
+		log.WithError(err).Fatalf("Failed to open claim file from the path %s", pathClaims)
+	}
 
 	defer jsonFile.Close()
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		log.WithError(err).Fatalf("Failed to read claim file from the path %s", pathClaims)
+	}
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
 	var claimsJSON map[string]interface{}
-	json.Unmarshal([]byte(byteValue), &claimsJSON)
+	err = json.Unmarshal([]byte(byteValue), &claimsJSON)
+	if err != nil {
+		log.WithError(err).Fatalf("Failed to deserialize claim file from the path %s", pathClaims)
+	}
 
 	signBytes, err := ioutil.ReadFile(pathPem)
+	if err != nil {
+		log.WithError(err).Fatalf("Failed to read pem file from the path %s", pathPem)
+	}
+
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
-	fatal(err)
+	if err != nil {
+		log.WithError(err).Fatalf("Failed to convert pem file to rsa privatw key from the path %s", pathPem)
+	}
+
 	t := jwt.NewWithClaims(jwt.GetSigningMethod("RS256"), jwt.MapClaims(claimsJSON))
 	t.Header["kid"] = keyID
 
 	token, err := t.SignedString(signKey)
-	fatal(err)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to Generate the signing token")
+	}
 
 	return token
 }
@@ -49,18 +66,30 @@ func gen(cmd *cobra.Command, args []string) {
 	jsonPath := cmd.Flag("claimJson").Value.String()
 	keyID := cmd.Flag("keyID").Value.String()
 
-	fmt.Println(genToken(pemPath, jsonPath, keyID))
+	token := genToken(pemPath, jsonPath, keyID)
+	log.WithFields(log.Fields{
+		"token": token,
+	}).Info("Jwt token generated successfully")
 }
 
 func init() {
 	rootCmd.AddCommand(genCmd)
-	genCmd.Flags().StringP("privatePem", "p", "", "path of private key pem file")
-	genCmd.Flags().StringP("claimJson", "c", "", "path of claim json file")
-	genCmd.Flags().StringP("keyID", "k", "", "id of private key")
-}
 
-func fatal(err error) {
+	genCmd.Flags().StringP("privatePem", "p", "", "path of private key pem file")
+	err := genCmd.MarkFlagRequired("privatePem")
 	if err != nil {
-		log.Fatal(err)
+		log.WithError(err).WithField("parameter", "privatePem").Fatal("Failed to parse parameter")
+	}
+
+	genCmd.Flags().StringP("claimJson", "c", "", "path of claim json file")
+	err = genCmd.MarkFlagRequired("claimJson")
+	if err != nil {
+		log.WithError(err).WithField("parameter", "claimJson").Fatal("Failed to parse parameter")
+	}
+
+	genCmd.Flags().StringP("keyID", "k", "", "id of private key")
+	err = genCmd.MarkFlagRequired("keyID")
+	if err != nil {
+		log.WithError(err).WithField("parameter", "keyID").Fatal("Failed to parse parameter")
 	}
 }
