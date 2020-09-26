@@ -34,20 +34,25 @@ func validateToken(pemPath, token string) {
 		return publicKey, nil
 	})
 
-	switch err.(type) {
+	switch e := err.(type) {
 	case nil:
 		if !validatedToken.Valid {
+			log.Info("Invalid token?")
 			return
 		}
+		log.Info("Valid token!")
 	case *jwt.ValidationError: // something was wrong during the validation
 		vErr := err.(*jwt.ValidationError)
 		switch vErr.Errors {
 		case jwt.ValidationErrorExpired:
+			log.WithError(e).Info("Token Expired!")
 			return
 		default:
+			log.WithError(e).Info("Error while Parsing Token with ValidationError!")
 			return
 		}
 	default: // something else went wrong
+		log.WithError(e).Info("Error while Parsing Token!")
 		return
 	}
 }
