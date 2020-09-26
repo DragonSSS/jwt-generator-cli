@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +41,11 @@ func validateToken(pemPath, token string) {
 			log.Info("Invalid token?")
 			return
 		}
-		log.Info("Valid token!")
+		if claims, ok := validatedToken.Claims.(jwt.MapClaims); ok {
+			log.WithFields(logrus.Fields{
+				"claims": claims,
+			}).Info("Valid token!")
+		}
 	case *jwt.ValidationError: // something was wrong during the validation
 		vErr := err.(*jwt.ValidationError)
 		switch vErr.Errors {
