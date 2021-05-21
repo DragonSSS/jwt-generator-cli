@@ -47,7 +47,7 @@ func genToken(pathPem string, pathClaims string, keyID string) string {
 
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
 	if err != nil {
-		log.WithError(err).Fatalf("Failed to convert pem file to rsa privatw key from the path %s", pathPem)
+		log.WithError(err).Fatalf("Failed to convert pem file to rsa private key from the path %s", pathPem)
 	}
 
 	t := jwt.NewWithClaims(jwt.GetSigningMethod("RS256"), jwt.MapClaims(claimsJSON))
