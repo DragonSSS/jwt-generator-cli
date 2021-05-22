@@ -11,8 +11,8 @@ jobs:
     - stage: lint
       before_install:
         - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.40.1
-      script: make lint
+      script: env GO111MODULE=on make lint
     - stage: test
-      script: make test
+      script: env GO111MODULE=on make test
     - stage: build
-      script: make build
+      script: env GO111MODULE=on make build
