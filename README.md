@@ -1,3 +1,3 @@
-[![Build Status](https://travis-ci.com/DragonSSS/jwt-generator-cli.svg?branch=master)](https://travis-ci.com/DragonSSS/jwt-generator-cli)
+[![Build Status](https://app.travis-ci.com/DragonSSS/jwt-generator-cli.svg?branch=master)](https://app.travis-ci.com/DragonSSS/jwt-generator-cli)
 
 # jwt-generator-cli
