@@ -35,9 +35,9 @@ show-coverage: test
 		$(GOCMD) tool cover -html=coverage.out
 
 lint-docker:
-		docker run --rm -v $(CURDIR):/app -w /app golangci/golangci-lint:v1.40.1 golangci-lint run -v
+		docker run --rm -v $(CURDIR):/app -w /app golangci/golangci-lint:v1.43.0 golangci-lint run -v
 
 lint:
-		$(LINTER) run
+		$(LINTER) run -v
 
 .PHONY: all setup build build-linux clean test show-coverage lint-docker lint

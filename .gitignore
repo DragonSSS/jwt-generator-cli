@@ -1,5 +1,5 @@
 build/bin
-go.sum
+!go.sum
 coverage.out
 test/data/jwt.private.pem
 test/data/jwt.public.pem
