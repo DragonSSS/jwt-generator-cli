@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt/v4"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -50,7 +50,7 @@ func genToken(pathPem string, pathClaims string, keyID string) string {
 		log.WithError(err).Fatalf("Failed to convert pem file to rsa private key from the path %s", pathPem)
 	}
 
-	t := jwt.NewWithClaims(jwt.GetSigningMethod("RS256"), jwt.MapClaims(claimsJSON))
+	t := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims(claimsJSON))
 	t.Header["kid"] = keyID
 
 	token, err := t.SignedString(signKey)
